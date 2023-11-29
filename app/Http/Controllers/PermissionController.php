@@ -18,7 +18,7 @@ class PermissionController extends Controller
             return datatables()->of($data)
                 ->addColumn('action', function ($data) {
                     $btn =  '<a class="btn btn-primary btn-sm fw-bold" type="button" data-bs-toggle="modal"
-                    data-bs-target="#staticBackdrop">Manage</a>
+                    data-bs-target="#edit' . $data->id . '">Manage</a>
                     ';
                     return $btn;
                 })
@@ -28,6 +28,7 @@ class PermissionController extends Controller
         }
         $datas = [
             'title' => 'Permissions',
+            'permissions' => Permission::all(),
 
         ];
         return view('permissions.index', $datas);
@@ -49,7 +50,15 @@ class PermissionController extends Controller
         $permission = Permission::create(['name' => $request->name]);
 
         if ($permission) {
-            return redirect()->back();
+            return response()->json([
+                'success' => true,
+                'message' => 'Permission Created',
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Permission Not Created',
+            ]);
         }
     }
 

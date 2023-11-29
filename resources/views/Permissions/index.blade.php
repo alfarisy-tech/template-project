@@ -36,7 +36,44 @@
         </div>
     </div>
 
-    <form method="POST" enctype="multipart/form-data" action="{{ url('permissions') }}">
+    @foreach ($permissions as $data)
+        <form method="POST" enctype="multipart/form-data" action="{{ url('permissions/' . $data->id) }}">
+            @csrf
+            @method('PUT')
+            <!-- Modal -->
+            <div class="modal fade" id="edit{{ $data->id }}" tabindex="-1" role="dialog"
+                aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="new">Tambah</h5>
+                            <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row form-group">
+                                <div class="col-12 mb-3">
+                                    <label for="name">Name</label>
+                                    <input id="name" type="text" class="form-control" value="{{ $data->name }}"
+                                        name="name">
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label for="guard">Guard</label>
+                                    <input id="guard" type="text" class="form-control" readonly value="web"
+                                        name="guard">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer"><button class="btn btn-secondary" type="button"
+                                data-bs-dismiss="modal">Tutup</button><button class="btn btn-primary"
+                                type="submit">Simpan</button></div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    @endforeach
+
+
+    <form id="simpan" method="POST" enctype="multipart/form-data" action="{{ url('permissions') }}">
         @csrf
         @method('POST')
         <!-- Modal -->
@@ -68,8 +105,34 @@
             </div>
         </div>
     </form>
+
+
     @push('script')
         <script>
+            $('#simpan').on('submit', function() {
+                event.preventDefault();
+                var form = $(this);
+                var url = form.attr('action');
+                var data = new FormData(this);
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: data,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function(data) {
+                        $('#new').modal('hide');
+                        $('#simpan')[0].reset();
+                        $('#example').DataTable().ajax.reload();
+                        alert('Data berhasil disimpan');
+                    },
+                    error: function(data) {
+                        alert('Data gagal disimpan');
+                    }
+                });
+            })
+
             $('#example').DataTable({
                 processing: true,
                 serverSide: true,
