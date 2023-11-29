@@ -10,10 +10,27 @@ class PermissionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $permissions = Permission::all();
-        return view('permissions.index', compact('permissions'));
+
+        if ($request->ajax()) {
+            $data = Permission::all();
+            return datatables()->of($data)
+                ->addColumn('action', function ($data) {
+                    $btn =  '<a class="btn btn-primary btn-sm fw-bold" type="button" data-bs-toggle="modal"
+                    data-bs-target="#staticBackdrop">Manage</a>
+                    ';
+                    return $btn;
+                })
+                ->addIndexColumn()
+                ->rawColumns(['action'])
+                ->make(true);
+        }
+        $datas = [
+            'title' => 'Permissions',
+
+        ];
+        return view('permissions.index', $datas);
     }
 
     /**

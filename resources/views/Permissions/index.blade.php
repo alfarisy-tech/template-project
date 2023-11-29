@@ -1,51 +1,33 @@
 @extends('layouts.index')
 @section('content')
     @push('css')
+        <style type="text/css" class="init">
+            div.container {
+                max-width: 1200px
+            }
+        </style>
     @endpush
-    <div class="container-xl px-4 mt-4">
+    <div class="container-xl px-4 mt-n10 ">
         <div class="card">
+            <div class="card-header">
+                <a href="#" type="button" data-bs-toggle="modal" data-bs-target="#new"
+                    class="btn btn-primary fw-bold text-md">+ New</a>
+            </div>
             <div class="card-body">
                 <div class="row mb-5">
-                    <div class="col-12">
-                        <h3>Permissions</h3>
-                        <hr>
-                        <h6>Add Permissions</h6>
-                        <form method="POST" enctype="multipart/form-data" action="{{ url('permissions') }}">
-                            @csrf
-                            @method('POST')
-                            <div class="row form-group">
-                                <div class="col-6 mb-3">
-                                    <label for="">Name</label>
-                                    <input type="text" class="form-control" value="" name="name">
-                                </div>
-                                <div class="col-6 mb-3">
-                                    <label for="">Guard</label>
-                                    <input type="text" class="form-control" readonly value="web" name="guard">
-                                </div>
-                                <div class="col-3 mb-3">
-                                    <button type="submit" class="btn btn-primary">Save</button>
-                                </div>
-                            </div>
-                        </form>
+                    <div class="col-12 mb-3">
                     </div>
-                    <hr>
                     <div class="col-12">
-                        <table class="table">
+                        <table id="example" class="table display nowrap" style="width:100%">
                             <thead>
                                 <tr>
                                     <th scope="col">#</th>
-                                    <th scope="col">Name</th>
-                                    <th scope="col">Guard</th>
+                                    <th class="text-center" scope="col">Name</th>
+                                    <th class="text-center" scope="col">Guard</th>
+                                    <th class="text-center" scope="col">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($permissions as $permission)
-                                    <tr>
-                                        <th scope="row">{{ $loop->index + 1 }}</th>
-                                        <td>{{ $permission->name }}</td>
-                                        <td>{{ $permission->guard_name }}</td>
-                                    </tr>
-                                @endforeach
                             </tbody>
                         </table>
                     </div>
@@ -53,7 +35,76 @@
             </div>
         </div>
     </div>
+
+    <form method="POST" enctype="multipart/form-data" action="{{ url('permissions') }}">
+        @csrf
+        @method('POST')
+        <!-- Modal -->
+        <div class="modal fade" id="new" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="new">Tambah</h5>
+                        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row form-group">
+                            <div class="col-12 mb-3">
+                                <label for="name">Name</label>
+                                <input id="name" type="text" class="form-control" value="" name="name">
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="guard">Guard</label>
+                                <input id="guard" type="text" class="form-control" readonly value="web"
+                                    name="guard">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer"><button class="btn btn-secondary" type="button"
+                            data-bs-dismiss="modal">Tutup</button><button class="btn btn-primary"
+                            type="submit">Simpan</button></div>
+                </div>
+            </div>
+        </div>
+    </form>
     @push('script')
+        <script>
+            $('#example').DataTable({
+                processing: true,
+                serverSide: true,
+                responsive: true,
+                fixedHeader: true,
+                scrollX: true,
+                scrollY: '50vh',
+                paging: false,
+                ajax: `{{ url('permissions') }}`,
+                columns: [{
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
+                        searchable: false,
+                        orderable: false,
+                        className: 'text-center fw-bold'
+                    },
+                    {
+                        data: 'name',
+                        name: 'name',
+                    },
+                    {
+                        className: 'text-center',
+                        data: 'guard_name',
+                        name: 'guard_name',
+                    },
+                    {
+                        className: 'text-center',
+                        data: 'action',
+                        name: 'action',
+                        searchable: false,
+                        orderable: false,
+                    },
+                ],
+            });
+        </script>
     @endpush
 @endsection
 {{-- <!DOCTYPE html>
