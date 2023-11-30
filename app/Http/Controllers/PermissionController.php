@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
 
 class PermissionController extends Controller
@@ -47,18 +48,24 @@ class PermissionController extends Controller
      */
     public function store(Request $request)
     {
-        $permission = Permission::create(['name' => $request->name]);
+        try {
+            DB::beginTransaction();
+            $permission = Permission::create(['name' => $request->name]);
 
-        if ($permission) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Permission Created',
-            ]);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Permission Not Created',
-            ]);
+            if ($permission) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Permission Created',
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Permission Not Created',
+                ]);
+            }
+        } catch (\Exception $e) {
+            DB::rollback();
+            throw $e;
         }
     }
 
