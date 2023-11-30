@@ -19,12 +19,21 @@
         </div>
         {{-- ** End Master User --}}
 
+        {{-- ** Log --}}
+        <div class="sidenav-menu-heading">Activity</div>
+        <!-- Sidenav Link (Charts)-->
+        <a class="nav-link" href="{{ url('logs') }}">
+            <div class="nav-link-icon"><i data-feather="activity"></i></div>
+            Log
+        </a>
+
+        {{-- ** End Log --}}
 
         {{-- ** Presence --}}
         <!-- Sidenav Heading (Addons)-->
         <div class="sidenav-menu-heading">Presence</div>
         <!-- Sidenav Link (Charts)-->
-        <a class="nav-link" href="charts.html">
+        <a class="nav-link" href="{{ url('presence/in') }}">
             <div class="nav-link-icon"><i data-feather="corner-down-right"></i></div>
             In
         </a>

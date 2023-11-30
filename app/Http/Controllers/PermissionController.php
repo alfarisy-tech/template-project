@@ -13,7 +13,6 @@ class PermissionController extends Controller
      */
     public function index(Request $request)
     {
-
         if ($request->ajax()) {
             $data = Permission::all();
             return datatables()->of($data)
@@ -51,6 +50,12 @@ class PermissionController extends Controller
 
             if ($permission) {
                 DB::commit();
+
+                activity()
+                    ->causedBy(1)
+                    ->performedOn($permission)
+                    ->createdAt(now())
+                    ->log('<span class="text-green text-capitalize">created permission </span> <span class="text-black fw-bold text-capitalize">"' . $permission->name . '"</span>');
                 return response()->json([
                     'success' => true,
                     'message' => 'Permission Created',
@@ -97,6 +102,11 @@ class PermissionController extends Controller
 
             if ($permission) {
                 DB::commit();
+                activity()
+                    ->causedBy(1)
+                    ->performedOn($permission)
+                    ->createdAt(now())
+                    ->log('<span class="text-blue text-capitalize">updated permission </span> <span class="text-black fw-bold text-capitalize">"' . $permission->name . '"</span>');
                 return response()->json([
                     'success' => true,
                     'message' => 'Permission Updated',
@@ -126,6 +136,11 @@ class PermissionController extends Controller
 
             if ($permission) {
                 DB::commit();
+                activity()
+                    ->causedBy(1)
+                    ->performedOn($permission)
+                    ->createdAt(now())
+                    ->log('<span class="text-red text-capitalize">deleted permission </span> <span class="text-black fw-bold text-capitalize">"' . $permission->name . '"</span>');
                 return response()->json([
                     'success' => true,
                     'message' => 'Permission Deleted',

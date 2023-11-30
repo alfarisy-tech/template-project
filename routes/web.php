@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LogController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
@@ -38,4 +39,14 @@ Route::prefix('users')->group(function () {
     Route::post('/', [UserController::class, 'store']);
     Route::put('/{users}', [UserController::class, 'update']);
     Route::get('/{users}/delete', [UserController::class, 'destroy']);
+    Route::get('/{users}/reset-password', [UserController::class, 'resetPassword']);
+});
+
+Route::get('/logs', [LogController::class, '__invoke']);
+
+Route::prefix('presence')->group(function () {
+    Route::get('/in', function () {
+        $title = 'Presence In';
+        return view('presence_in.index', compact('title'));
+    });
 });

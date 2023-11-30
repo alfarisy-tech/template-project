@@ -43,7 +43,7 @@
                     <a href="{{ url('users/' . $data->id . '/delete') }}"
                         class="delete btn-red btn text-light">Delete</a>
                     <a href="{{ url('users/' . $data->id . '/reset-password') }}"
-                        class="delete btn-secondary btn text-light">Reset
+                        class="reset-password btn-secondary btn text-light">Reset
                         Password</a>
 
                     <button class="btn btn-warning closeModalUpdate" type="button"

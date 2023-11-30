@@ -218,6 +218,52 @@
                 })
             })
 
+            $(document).on('click', '.reset-password', function(event) {
+                event.preventDefault();
+                var url = $(this).attr('href');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#0464f4',
+                    cancelButtonColor: '#f8a404',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: url,
+                            type: 'GET',
+                            dataType: 'json',
+                            beforeSend: function() {
+                                $('.reset-password').prop('disabled', true);
+                                $('.reset-password').html('<i class="fa fa-spin fa-spinner"></i>');
+                            },
+                            success: function(data) {
+                                $('#example').DataTable().ajax.reload();
+                                $('.closeModalUpdate').click();
+                                toastr.success(data.message, 'Success', {
+                                    timeOut: 3000,
+                                    closeButton: true,
+                                    progressBar: true,
+                                })
+                            },
+                            error: function(xhr, ajaxOptions, thrownError) {
+                                let response = xhr.responseJSON;
+                                toastr.error(response.message, 'Error', {
+                                    timeOut: 3000,
+                                    closeButton: true,
+                                    progressBar: true
+                                });
+                            },
+                            complete: function() {
+                                $('.reset-password').prop('disabled', false);
+                                $('.reset-password').html('Reset Password');
+                            },
+                        });
+                    }
+                })
+            })
+
             $('#example').DataTable({
                 processing: true,
                 serverSide: true,

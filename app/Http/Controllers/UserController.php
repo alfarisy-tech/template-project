@@ -162,4 +162,34 @@ class UserController extends Controller
             throw $e;
         }
     }
+
+    /**
+     * Reset Password
+     */
+    public function resetPassword(string $id)
+    {
+        try {
+            DB::beginTransaction();
+            $user = User::find($id);
+            if ($user) {
+                $user->update([
+                    'password' => bcrypt(12345678),
+                ]);
+                DB::commit();
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Password Reset Success',
+                ]);
+            } else {
+                DB::rollback();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Password Not Reset ',
+                ]);
+            }
+        } catch (\Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+    }
 }
