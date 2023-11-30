@@ -18,10 +18,7 @@ class PermissionController extends Controller
             $data = Permission::all();
             return datatables()->of($data)
                 ->addColumn('action', function ($data) {
-                    $btn =  '<a class="btn btn-primary btn-sm fw-bold" type="button" data-bs-toggle="modal"
-                    data-bs-target="#edit' . $data->id . '">Manage</a>
-                    ';
-                    return $btn;
+                    return view('permissions._option', compact('data'))->render();
                 })
                 ->addIndexColumn()
                 ->rawColumns(['action'])
@@ -53,11 +50,13 @@ class PermissionController extends Controller
             $permission = Permission::create(['name' => $request->name]);
 
             if ($permission) {
+                DB::commit();
                 return response()->json([
                     'success' => true,
                     'message' => 'Permission Created',
                 ]);
             } else {
+                DB::rollback();
                 return response()->json([
                     'success' => false,
                     'message' => 'Permission Not Created',
@@ -89,7 +88,30 @@ class PermissionController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        // dd($request->all());
+        try {
+            DB::beginTransaction();
+            $permission = Permission::find($id);
+            $permission->name = $request->name;
+            $permission->save();
+
+            if ($permission) {
+                DB::commit();
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Permission Updated',
+                ]);
+            } else {
+                DB::rollback();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Permission Not Updated',
+                ]);
+            }
+        } catch (\Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
     }
 
     /**
@@ -97,6 +119,27 @@ class PermissionController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            DB::beginTransaction();
+            $permission = Permission::find($id);
+            $permission->delete();
+
+            if ($permission) {
+                DB::commit();
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Permission Deleted',
+                ]);
+            } else {
+                DB::rollback();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Permission Not Deleted',
+                ]);
+            }
+        } catch (\Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
     }
 }

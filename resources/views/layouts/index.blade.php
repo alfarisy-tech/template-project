@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="description" content="" />
     <meta name="author" content="" />
-    <title>Blank Starter (Minimal) - SB Admin Pro</title>
+    <title>NUNA APP | {{ $title != null ? $title : 'Dashboard' }} </title>
     @include('layouts.partial.css')
 </head>
 

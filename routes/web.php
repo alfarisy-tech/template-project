@@ -23,22 +23,19 @@ Route::get('/', function () {
 Route::prefix('permissions')->group(function () {
     Route::get('/', [PermissionController::class, 'index']);
     Route::post('/', [PermissionController::class, 'store']);
-    Route::get('/{permission}', [PermissionController::class, 'show']);
     Route::put('/{permission}', [PermissionController::class, 'update']);
-    Route::delete('/{permission}', [PermissionController::class, 'destroy']);
+    Route::get('/{permission}/delete', [PermissionController::class, 'destroy']);
 });
 
 Route::prefix('roles')->group(function () {
     Route::get('/', [RoleController::class, 'index'])->name('roles.index');
     Route::post('/', [RoleController::class, 'store']);
-    Route::get('/{roles}', [RoleController::class, 'edit']);
     Route::put('/{roles}', [RoleController::class, 'update']);
-    Route::delete('/{roles}', [RoleController::class, 'destroy']);
+    Route::get('/{roles}/delete', [RoleController::class, 'destroy']);
 });
 Route::prefix('users')->group(function () {
-    Route::get('/', [UserController::class, 'index'])->name('users.index');
+    Route::get('/', [UserController::class, 'index']);
     Route::post('/', [UserController::class, 'store']);
-    Route::get('/{users}', [UserController::class, 'edit']);
     Route::put('/{users}', [UserController::class, 'update']);
-    Route::delete('/{users}', [UserController::class, 'destroy']);
+    Route::get('/{users}/delete', [UserController::class, 'destroy']);
 });

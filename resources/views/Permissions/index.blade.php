@@ -13,6 +13,42 @@
                 <a href="#" type="button" data-bs-toggle="modal" data-bs-target="#new"
                     class="btn btn-primary fw-bold text-md">+ New</a>
             </div>
+            <!-- Modal -->
+            <div class="modal fade" id="new" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <form class="save" method="POST" enctype="multipart/form-data" action="{{ url('permissions') }}">
+                        @csrf
+                        @method('POST')
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="new">Tambah</h5>
+                                <button class="btn-close" type="button" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row form-group">
+                                    <div class="col-12 mb-3">
+                                        <label for="name">Name</label>
+                                        <input id="name" type="text" class="form-control" value=""
+                                            name="name">
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label for="guard">Guard</label>
+                                        <input id="guard" type="text" class="form-control" readonly value="web"
+                                            name="guard">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-warning" type="button" data-bs-dismiss="modal">Close</button>
+                                <button class="btn btn-primary saveButton" type="submit">Save</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <div class="card-body">
                 <div class="row mb-5">
                     <div class="col-12 mb-3">
@@ -38,78 +74,9 @@
 
 
 
-
-    <form class="simpan" method="POST" enctype="multipart/form-data" action="{{ url('permissions') }}">
-        @csrf
-        @method('POST')
-        <!-- Modal -->
-        <div class="modal fade" id="new" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
-            aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="new">Tambah</h5>
-                        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row form-group">
-                            <div class="col-12 mb-3">
-                                <label for="name">Name</label>
-                                <input id="name" type="text" class="form-control" value="" name="name">
-                            </div>
-                            <div class="col-12 mb-3">
-                                <label for="guard">Guard</label>
-                                <input id="guard" type="text" class="form-control" readonly value="web"
-                                    name="guard">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer"><button class="btn btn-secondary" type="button"
-                            data-bs-dismiss="modal">Tutup</button><button class="btn btn-primary"
-                            type="submit">Simpan</button></div>
-                </div>
-            </div>
-        </div>
-    </form>
-
-    @foreach ($permissions as $data)
-        <form method="POST" enctype="multipart/form-data" action="{{ url('permissions/' . $data->id) }}">
-            @csrf
-            @method('PUT')
-            <!-- Modal -->
-            <div class="modal fade" id="edit{{ $data->id }}" tabindex="-1" role="dialog"
-                aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="new">Tambah</h5>
-                            <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="row form-group">
-                                <div class="col-12 mb-3">
-                                    <label for="name">Name</label>
-                                    <input id="name" type="text" class="form-control" value="{{ $data->name }}"
-                                        name="name">
-                                </div>
-                                <div class="col-12 mb-3">
-                                    <label for="guard">Guard</label>
-                                    <input id="guard" type="text" class="form-control" readonly value="web"
-                                        name="guard">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer"><button class="btn btn-secondary" type="button"
-                                data-bs-dismiss="modal">Tutup</button><button class="btn btn-primary"
-                                type="submit">Simpan</button></div>
-                    </div>
-                </div>
-            </div>
-        </form>
-    @endforeach
     @push('script')
         <script>
-            $(document).find('.simpan').on('submit', function() {
+            $(document).find('.save').on('submit', function(event) {
                 event.preventDefault();
                 var form = $(this);
                 var url = form.attr('action');
@@ -121,21 +88,124 @@
                     cache: false,
                     contentType: false,
                     processData: false,
+                    beforeSend: function() {
+                        $('.saveButton').prop('disabled', true);
+                        $('.saveButton').html('<i class="fa fa-spin fa-spinner"></i>');
+                    },
                     success: function(data) {
                         $('#example').DataTable().ajax.reload();
-                        toastr.success('We do have the Kapua suite available.', 'Turtle Bay Resort', {
-                            timeOut: 5000,
+                        $('#new').modal('hide');
+                        // kosongkan form
+                        form[0].reset();
+                        toastr.success(data.message, 'Success', {
+                            timeOut: 3000,
                             closeButton: true,
                             progressBar: true,
-                            closeMethod: 'fadeOut',
-
                         })
-
                     },
-                    error: function(data) {
-                        alert('Data gagal disimpan');
-                    }
+                    error: function(xhr, ajaxOptions, thrownError) {
+                        let response = xhr.responseJSON;
+                        toastr.error(response.message, 'Error', {
+                            timeOut: 3000,
+                            closeButton: true,
+                            progressBar: true
+                        });
+                    },
+                    complete: function() {
+                        $('.saveButton').prop('disabled', false);
+                        $('.saveButton').html('Save');
+                    },
                 });
+            })
+
+
+            $(document).on('submit', '.update', function(event) {
+                event.preventDefault();
+                var form = $(this);
+                var url = form.attr('action');
+                var data = new FormData(this);
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: data,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    dataType: 'json',
+                    beforeSend: function() {
+                        $('.updateButton').prop('disabled', true);
+                        $('.updateButton').html('<i class="fa fa-spin fa-spinner"></i>');
+                    },
+                    success: function(data) {
+                        $('#example').DataTable().ajax.reload();
+                        $('.closeModalUpdate').click();
+                        // kosongkan form
+                        form[0].reset();
+                        toastr.success(data.message, 'Success', {
+                            timeOut: 3000,
+                            closeButton: true,
+                            progressBar: true,
+                        })
+                    },
+                    error: function(xhr, ajaxOptions, thrownError) {
+                        let response = xhr.responseJSON;
+                        toastr.error(response.message, 'Error', {
+                            timeOut: 3000,
+                            closeButton: true,
+                            progressBar: true
+                        });
+                    },
+                    complete: function() {
+                        $('.updateButton').prop('disabled', false);
+                        $('.updateButton').html('Save');
+                    },
+                });
+            })
+
+            $(document).on('click', '.delete', function(event) {
+                event.preventDefault();
+                var url = $(this).attr('href');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#0464f4',
+                    cancelButtonColor: '#f8a404',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: url,
+                            type: 'GET',
+                            dataType: 'json',
+                            beforeSend: function() {
+                                $('.delete').prop('disabled', true);
+                                $('.delete').html('<i class="fa fa-spin fa-spinner"></i>');
+                            },
+                            success: function(data) {
+                                $('#example').DataTable().ajax.reload();
+                                $('.closeModalUpdate').click();
+                                toastr.success(data.message, 'Success', {
+                                    timeOut: 3000,
+                                    closeButton: true,
+                                    progressBar: true,
+                                })
+                            },
+                            error: function(xhr, ajaxOptions, thrownError) {
+                                let response = xhr.responseJSON;
+                                toastr.error(response.message, 'Error', {
+                                    timeOut: 3000,
+                                    closeButton: true,
+                                    progressBar: true
+                                });
+                            },
+                            complete: function() {
+                                $('.delete').prop('disabled', false);
+                                $('.delete').html('Delete');
+                            },
+                        });
+                    }
+                })
             })
 
             $('#example').DataTable({
@@ -164,7 +234,7 @@
                         name: 'guard_name',
                     },
                     {
-                        className: 'text-center',
+                        className: '',
                         data: 'action',
                         name: 'action',
                         searchable: false,
