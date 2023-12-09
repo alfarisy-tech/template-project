@@ -8,59 +8,49 @@
         </style>
     @endpush
     <div class="container-xl px-4 mt-n10 ">
-        <div class="card">
-            <div class="card-header">
-                <a href="#" type="button" data-bs-toggle="modal" data-bs-target="#new"
-                    class="btn btn-primary fw-bold text-md">+ New</a>
-            </div>
-            <!-- Modal -->
-            <div class="modal fade" id="new" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
-                aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <form class="save" method="POST" enctype="multipart/form-data" action="{{ url('permissions') }}">
+        <div class="row">
+            <div class="col-lg-4 mb-5">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <span class="mb-0">Create {{ $title }}</span>
+                    </div>
+                    <form class="needs-validation save" method="POST" enctype="multipart/form-data"
+                        action="{{ url('permissions') }}">
                         @csrf
                         @method('POST')
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="new">Tambah</h5>
-                                <button class="btn-close" type="button" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="row form-group">
-                                    <div class="col-12 mb-3">
-                                        <label for="name">Name</label>
-                                        <input id="name" type="text" class="form-control" value=""
-                                            name="name">
-                                    </div>
-                                    <div class="col-12 mb-3">
-                                        <label for="guard">Guard</label>
-                                        <input id="guard" type="text" class="form-control" readonly value="web"
-                                            name="guard">
-                                    </div>
+                        <div class="card-body">
+                            <div class="row form-group">
+                                <div class="col-12 mb-3">
+                                    <label class="text-dark" for="name">Name</label>
+                                    <input id="name" type="text" class="form-control" value="" name="name">
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label class="text-dark" for="guard">Guard</label>
+                                    <input id="guard" type="text" class="form-control" value="web" disabled
+                                        name="guard_name">
                                 </div>
                             </div>
-                            <div class="modal-footer">
-                                <button class="btn btn-warning" type="button" data-bs-dismiss="modal">Close</button>
-                                <button class="btn btn-primary saveButton" type="submit">Save</button>
-                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-warning" type="button" data-bs-dismiss="modal">Close</button>
+                            <button class="btn btn-primary saveButton" type="submit">Save</button>
                         </div>
                     </form>
                 </div>
             </div>
-
-            <div class="card-body">
-                <div class="row mb-5">
-                    <div class="col-12 mb-3">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        Data {{ $title }}
                     </div>
-                    <div class="col-12">
+                    <div class="card-body">
                         <table id="example" class="table display nowrap" style="width:100%">
                             <thead>
                                 <tr>
                                     <th scope="col">#</th>
-                                    <th class="text-center" scope="col">Name</th>
-                                    <th class="text-center" scope="col">Guard</th>
-                                    <th class="text-center" scope="col">Action</th>
+                                    <th class="text-center text-dark" scope="col">Name</th>
+                                    <th class="text-center  text-dark" scope="col">Guard</th>
+                                    <th class="text-center  text-dark" scope="col">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -76,49 +66,82 @@
 
     @push('script')
         <script>
-            $(document).find('.save').on('submit', function(event) {
-                event.preventDefault();
-                var form = $(this);
-                var url = form.attr('action');
-                var data = new FormData(this);
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: data,
-                    cache: false,
-                    contentType: false,
-                    processData: false,
-                    beforeSend: function() {
-                        $('.saveButton').prop('disabled', true);
-                        $('.saveButton').html('<i class="fa fa-spin fa-spinner"></i>');
-                    },
-                    success: function(data) {
-                        $('#example').DataTable().ajax.reload();
-                        $('#new').modal('hide');
-                        // kosongkan form
-                        form[0].reset();
-                        toastr.success(data.message, 'Success', {
-                            timeOut: 3000,
-                            closeButton: true,
-                            progressBar: true,
-                        })
-                    },
-                    error: function(xhr, ajaxOptions, thrownError) {
-                        let response = xhr.responseJSON;
-                        toastr.error(response.message, 'Error', {
-                            timeOut: 3000,
-                            closeButton: true,
-                            progressBar: true
-                        });
-                    },
-                    complete: function() {
-                        $('.saveButton').prop('disabled', false);
-                        $('.saveButton').html('Save');
-                    },
+            $(function() {
+
+
+                let validator = $('form.save').jbvalidator({
+                    errorMessage: true,
+                    successClass: false,
+                    language: "https://emretulek.github.io/jbvalidator/dist/lang/en.json"
                 });
+                $(document).find('.save').on('submit', function(event) {
+                    event.preventDefault();
+                    var form = $(this);
+                    var url = form.attr('action');
+                    var data = new FormData(this);
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: data,
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        beforeSend: function() {
+                            $('.saveButton').prop('disabled', true);
+                            $('.saveButton').html('<i class="fa fa-spin fa-spinner"></i>');
+                        },
+                        success: function(data) {
+                            $('#example').DataTable().ajax.reload();
+                            $('#new').modal('hide');
+                            // kosongkan form
+                            form[0].reset();
+                            // validator reset
+
+                            if (data.success == true) {
+                                toastr.success(data.message, 'Success', {
+                                    timeOut: 3000,
+                                    closeButton: true,
+                                    progressBar: true,
+                                })
+                            } else {
+                                toastr.warning(data.message, 'Warning', {
+                                    timeOut: 3000,
+                                    closeButton: true,
+                                    progressBar: true,
+                                })
+                            }
+                        },
+                        error: function(xhr, ajaxOptions, thrownError) {
+                            let data = xhr.responseJSON;
+                            if (data.errors) {
+                                Object.keys(data.errors).forEach(function(key) {
+                                    var fieldName = key;
+                                    var errorMessage = data.errors[key];
+                                    validator.errorTrigger($('[name=' + fieldName +
+                                        ']'), errorMessage);
+                                });
+                                toastr.warning(data.message, 'Warning', {
+                                    timeOut: 3000,
+                                    closeButton: true,
+                                    progressBar: true,
+                                })
+                            } else {
+                                toastr.error(data.message, 'Error', {
+                                    timeOut: 3000,
+                                    closeButton: true,
+                                    progressBar: true
+                                });
+                            }
+
+                        },
+                        complete: function() {
+                            $('.saveButton').prop('disabled', false);
+                            $('.saveButton').html('Save');
+                            $('.needs-validation').jbvalidator('destroy');
+                        },
+                    });
+                })
             })
-
-
             $(document).on('submit', '.update', function(event) {
                 event.preventDefault();
                 var form = $(this);
@@ -180,7 +203,8 @@
                             dataType: 'json',
                             beforeSend: function() {
                                 $('.delete').prop('disabled', true);
-                                $('.delete').html('<i class="fa fa-spin fa-spinner"></i>');
+                                $('.delete').html(
+                                    '<i class="fa fa-spin fa-spinner"></i>');
                             },
                             success: function(data) {
                                 $('#example').DataTable().ajax.reload();
@@ -222,9 +246,10 @@
                         name: 'DT_RowIndex',
                         searchable: false,
                         orderable: false,
-                        className: 'text-center fw-bold'
+                        className: 'text-center text-dark fw-bold'
                     },
                     {
+                        className: 'text-dark',
                         data: 'name',
                         name: 'name',
                     },
@@ -245,100 +270,3 @@
         </script>
     @endpush
 @endsection
-{{-- <!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-</head>
-
-<body>
-    <div class="container mt-5">
-        <div class="card">
-            <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
-                    data-bs-toggle="dropdown" aria-expanded="false">
-                    Menu
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                    <li><a href="{{ url('permissions') }}" class="dropdown-item" type="button">Permissions</a>
-                    </li>
-                    <li><a href="{{ url('roles') }}" class="dropdown-item" type="button">Roles</a></li>
-                    <li><a href="{{ url('users') }}" class="dropdown-item" type="button">Users</a></li>
-                </ul>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-12">
-                        <h3>Permissions</h3>
-                        <hr>
-                        <h6>Add Permissions</h6>
-                        <form method="POST" enctype="multipart/form-data" action="{{ url('permissions') }}">
-                            @csrf
-                            @method('POST')
-                            <div class="row form-group">
-                                <div class="col-6 mb-3">
-                                    <label for="">Name</label>
-                                    <input type="text" class="form-control" value="" name="name">
-                                </div>
-                                <div class="col-6 mb-3">
-                                    <label for="">Guard</label>
-                                    <input type="text" class="form-control" readonly value="web" name="guard">
-                                </div>
-                                <div class="col-3 mb-3">
-                                    <button type="submit" class="btn btn-primary">Save</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <hr>
-
-                    <div class="col-12">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">Name</th>
-                                    <th scope="col">Guard</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($permissions as $permission)
-                                    <tr>
-                                        <th scope="row">{{ $loop->index + 1 }}</th>
-                                        <td>{{ $permission->name }}</td>
-                                        <td>{{ $permission->guard_name }}</td>
-                                    </tr>
-                                @endforeach
-
-
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
-        integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
-        integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
-    </script>
-
-
-
-
-</body>
-
-</html> --}}

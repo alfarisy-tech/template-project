@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Permission;
 
 class PermissionController extends Controller
@@ -19,8 +20,11 @@ class PermissionController extends Controller
                 ->addColumn('action', function ($data) {
                     return view('permissions._option', compact('data'))->render();
                 })
+                ->editColumn('guard_name', function ($data) {
+                    return '<span class="badge bg-secondary">' . $data->guard_name . '</span>';
+                })
                 ->addIndexColumn()
-                ->rawColumns(['action'])
+                ->rawColumns(['action', 'guard_name'])
                 ->make(true);
         }
         $datas = [
@@ -44,18 +48,29 @@ class PermissionController extends Controller
      */
     public function store(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+                'message' => 'Validation failed. Please check your input.'
+            ], 422);
+        }
         try {
             DB::beginTransaction();
-            $permission = Permission::create(['name' => $request->name]);
 
+            $permission = Permission::create(['name' => $request->name]);
             if ($permission) {
                 DB::commit();
 
-                activity()
-                    ->causedBy(1)
-                    ->performedOn($permission)
-                    ->createdAt(now())
-                    ->log('<span class="text-green text-capitalize">created permission </span> <span class="text-black fw-bold text-capitalize">"' . $permission->name . '"</span>');
+                // activity()
+                //     ->causedBy(1)
+                //     ->performedOn($permission)
+                //     ->createdAt(now())
+                //     ->log('<span class="text-green text-capitalize">created permission </span> <span class="text-black fw-bold text-capitalize">"' . $permission->name . '"</span>');
                 return response()->json([
                     'success' => true,
                     'message' => 'Permission Created',
@@ -102,11 +117,11 @@ class PermissionController extends Controller
 
             if ($permission) {
                 DB::commit();
-                activity()
-                    ->causedBy(1)
-                    ->performedOn($permission)
-                    ->createdAt(now())
-                    ->log('<span class="text-blue text-capitalize">updated permission </span> <span class="text-black fw-bold text-capitalize">"' . $permission->name . '"</span>');
+                // activity()
+                //     ->causedBy(1)
+                //     ->performedOn($permission)
+                //     ->createdAt(now())
+                //     ->log('<span class="text-blue text-capitalize">updated permission </span> <span class="text-black fw-bold text-capitalize">"' . $permission->name . '"</span>');
                 return response()->json([
                     'success' => true,
                     'message' => 'Permission Updated',
@@ -136,11 +151,11 @@ class PermissionController extends Controller
 
             if ($permission) {
                 DB::commit();
-                activity()
-                    ->causedBy(1)
-                    ->performedOn($permission)
-                    ->createdAt(now())
-                    ->log('<span class="text-red text-capitalize">deleted permission </span> <span class="text-black fw-bold text-capitalize">"' . $permission->name . '"</span>');
+                // activity()
+                //     ->causedBy(1)
+                //     ->performedOn($permission)
+                //     ->createdAt(now())
+                //     ->log('<span class="text-red text-capitalize">deleted permission </span> <span class="text-black fw-bold text-capitalize">"' . $permission->name . '"</span>');
                 return response()->json([
                     'success' => true,
                     'message' => 'Permission Deleted',
