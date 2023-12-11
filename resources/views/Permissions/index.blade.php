@@ -1,11 +1,6 @@
 @extends('layouts.index')
 @section('content')
     @push('css')
-        <style type="text/css" class="init">
-            div.container {
-                max-width: 1200px
-            }
-        </style>
     @endpush
     <div class="container-xl px-4 mt-n10 ">
         <div class="row">
@@ -32,7 +27,7 @@
                             </div>
                         </div>
                         <div class="card-footer">
-                            <button class="btn btn-warning" type="button" data-bs-dismiss="modal">Close</button>
+                            <button class="btn btn-warning" type="reset" data-bs-dismiss="modal">Reset</button>
                             <button class="btn btn-primary saveButton" type="submit">Save</button>
                         </div>
                     </form>
@@ -41,7 +36,7 @@
             <div class="col-lg-8">
                 <div class="card">
                     <div class="card-header">
-                        Data {{ $title }}
+                        {{ $title }}
                     </div>
                     <div class="card-body">
                         <table id="example" class="table display nowrap" style="width:100%">
@@ -49,8 +44,8 @@
                                 <tr>
                                     <th scope="col">#</th>
                                     <th class="text-center text-dark" scope="col">Name</th>
-                                    <th class="text-center  text-dark" scope="col">Guard</th>
-                                    <th class="text-center  text-dark" scope="col">Action</th>
+                                    <th class="text-center text-dark" scope="col">Guard</th>
+                                    <th class="text-center text-dark" scope="col">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -68,13 +63,14 @@
         <script>
             $(function() {
 
-
-                let validator = $('form.save').jbvalidator({
-                    errorMessage: true,
-                    successClass: false,
-                    language: "https://emretulek.github.io/jbvalidator/dist/lang/en.json"
-                });
+                //submit save
                 $(document).find('.save').on('submit', function(event) {
+                    let validator = $('form.save,form.update').jbvalidator({
+                        errorMessage: true,
+                        successClass: false,
+                        language: "https://emretulek.github.io/jbvalidator/dist/lang/en.json"
+                    });
+
                     event.preventDefault();
                     var form = $(this);
                     var url = form.attr('action');
@@ -92,7 +88,6 @@
                         },
                         success: function(data) {
                             $('#example').DataTable().ajax.reload();
-                            $('#new').modal('hide');
                             // kosongkan form
                             form[0].reset();
                             // validator reset
@@ -137,98 +132,128 @@
                         complete: function() {
                             $('.saveButton').prop('disabled', false);
                             $('.saveButton').html('Save');
-                            $('.needs-validation').jbvalidator('destroy');
                         },
                     });
                 })
-            })
-            $(document).on('submit', '.update', function(event) {
-                event.preventDefault();
-                var form = $(this);
-                var url = form.attr('action');
-                var data = new FormData(this);
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: data,
-                    cache: false,
-                    contentType: false,
-                    processData: false,
-                    dataType: 'json',
-                    beforeSend: function() {
-                        $('.updateButton').prop('disabled', true);
-                        $('.updateButton').html('<i class="fa fa-spin fa-spinner"></i>');
-                    },
-                    success: function(data) {
-                        $('#example').DataTable().ajax.reload();
-                        $('.closeModalUpdate').click();
-                        // kosongkan form
-                        form[0].reset();
-                        toastr.success(data.message, 'Success', {
-                            timeOut: 3000,
-                            closeButton: true,
-                            progressBar: true,
-                        })
-                    },
-                    error: function(xhr, ajaxOptions, thrownError) {
-                        let response = xhr.responseJSON;
-                        toastr.error(response.message, 'Error', {
-                            timeOut: 3000,
-                            closeButton: true,
-                            progressBar: true
-                        });
-                    },
-                    complete: function() {
-                        $('.updateButton').prop('disabled', false);
-                        $('.updateButton').html('Save');
-                    },
-                });
-            })
 
-            $(document).on('click', '.delete', function(event) {
-                event.preventDefault();
-                var url = $(this).attr('href');
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#0464f4',
-                    cancelButtonColor: '#f8a404',
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: url,
-                            type: 'GET',
-                            dataType: 'json',
-                            beforeSend: function() {
-                                $('.delete').prop('disabled', true);
-                                $('.delete').html(
-                                    '<i class="fa fa-spin fa-spinner"></i>');
-                            },
-                            success: function(data) {
-                                $('#example').DataTable().ajax.reload();
-                                $('.closeModalUpdate').click();
+                //submit update
+                $(document).on('submit', '.update', function(event) {
+                    let validator = $('form.save,form.update').jbvalidator({
+                        errorMessage: true,
+                        successClass: false,
+                        language: "https://emretulek.github.io/jbvalidator/dist/lang/en.json"
+                    });
+
+                    event.preventDefault();
+                    var form = $(this);
+                    var url = form.attr('action');
+                    var data = new FormData(this);
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: data,
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        dataType: 'json',
+                        beforeSend: function() {
+                            $('.updateButton').prop('disabled', true);
+                            $('.updateButton').html('<i class="fa fa-spin fa-spinner"></i>');
+                        },
+                        success: function(data) {
+                            $('#example').DataTable().ajax.reload();
+                            $('.closeModalUpdate').click();
+                            // kosongkan form
+                            form[0].reset();
+                            if (data.success == true) {
                                 toastr.success(data.message, 'Success', {
                                     timeOut: 3000,
                                     closeButton: true,
                                     progressBar: true,
                                 })
-                            },
-                            error: function(xhr, ajaxOptions, thrownError) {
-                                let response = xhr.responseJSON;
-                                toastr.error(response.message, 'Error', {
+                            } else {
+                                toastr.warning(data.message, 'Warning', {
+                                    timeOut: 3000,
+                                    closeButton: true,
+                                    progressBar: true,
+                                })
+                            }
+                        },
+                        error: function(xhr, ajaxOptions, thrownError) {
+                            let data = xhr.responseJSON;
+                            if (data.errors) {
+                                Object.keys(data.errors).forEach(function(key) {
+                                    var fieldName = key;
+                                    var errorMessage = data.errors[key];
+                                    validator.errorTrigger(form.find('[name=' + fieldName +
+                                        ']'), errorMessage);
+                                });
+                                toastr.warning(data.message, 'Warning', {
+                                    timeOut: 3000,
+                                    closeButton: true,
+                                    progressBar: true,
+                                })
+                            } else {
+                                toastr.error(data.message, 'Error', {
                                     timeOut: 3000,
                                     closeButton: true,
                                     progressBar: true
                                 });
-                            },
-                            complete: function() {
-                                $('.delete').prop('disabled', false);
-                                $('.delete').html('Delete');
-                            },
-                        });
-                    }
+                            }
+                        },
+                        complete: function() {
+                            $('.updateButton').prop('disabled', false);
+                            $('.updateButton').html('Save');
+                        },
+                    });
+                })
+
+                //delete
+                $(document).on('click', '.delete', function(event) {
+                    event.preventDefault();
+                    var url = $(this).attr('href');
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "You won't be able to revert this!",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#0464f4',
+                        cancelButtonColor: '#f8a404',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                url: url,
+                                type: 'GET',
+                                dataType: 'json',
+                                beforeSend: function() {
+                                    $('.delete').prop('disabled', true);
+                                    $('.delete').html(
+                                        '<i class="fa fa-spin fa-spinner"></i>');
+                                },
+                                success: function(data) {
+                                    $('#example').DataTable().ajax.reload();
+                                    $('.closeModalUpdate').click();
+                                    toastr.success(data.message, 'Success', {
+                                        timeOut: 3000,
+                                        closeButton: true,
+                                        progressBar: true,
+                                    })
+                                },
+                                error: function(xhr, ajaxOptions, thrownError) {
+                                    let response = xhr.responseJSON;
+                                    toastr.error(response.message, 'Error', {
+                                        timeOut: 3000,
+                                        closeButton: true,
+                                        progressBar: true
+                                    });
+                                },
+                                complete: function() {
+                                    $('.delete').prop('disabled', false);
+                                    $('.delete').html('Delete');
+                                },
+                            });
+                        }
+                    })
                 })
             })
 
@@ -266,6 +291,15 @@
                         orderable: false,
                     },
                 ],
+                drawCallback: function(settings) {
+                    // Kode yang akan dijalankan setelah DataTable selesai dikerjakan
+                    $('#thisModal').html('');
+                    $('.currentModal').each(function() {
+                        let currentModal = $(this).html();
+                        $(this).html('');
+                        $('#thisModal').append(currentModal);
+                    });
+                },
             });
         </script>
     @endpush

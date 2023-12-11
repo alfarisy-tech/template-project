@@ -30,7 +30,7 @@
                             <div class="row align-items-center justify-content-between">
                                 <div class="col-auto mt-4">
                                     <h1 class="page-header-title">
-                                        <div class="page-header-icon"><i data-feather="external-link"></i></div>
+                                        <div class="page-header-icon"><i data-feather="circle"></i></div>
                                         {{ $title != null ? $title : 'Dashboard' }}
                                     </h1>
 
@@ -55,6 +55,9 @@
                 </div>
             </footer>
         </div>
+    </div>
+    <div id="thisModal">
+
     </div>
     @include('layouts.partial.script')
 </body>

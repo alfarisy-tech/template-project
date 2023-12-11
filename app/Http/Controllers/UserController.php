@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
@@ -26,7 +27,7 @@ class UserController extends Controller
                     $roleCount = count($data->roles);
 
                     foreach ($data->roles as $key => $role) {
-                        $roles .= '<span class="text-start fw-bold text-teal">' . $role->name . '</span>';
+                        $roles .= '<span class="badge bg-teal">' . $role->name . '</span>';
                         // Tambahkan tanda koma jika bukan elemen terakhir
                         if ($key < $roleCount - 1) {
                             $roles .= '<br/>';
@@ -34,8 +35,11 @@ class UserController extends Controller
                     }
                     return $roles;
                 })
+                ->editColumn('email', function ($data) {
+                    return '<a class="badge bg-warning" href="mailto:' . $data->email . '">' . $data->email . '</a>';
+                })
                 ->addIndexColumn()
-                ->rawColumns(['action', 'roles'])
+                ->rawColumns(['action', 'roles', 'email'])
                 ->make(true);
         }
         $datas = [
@@ -59,6 +63,17 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'email' => 'required|unique:users,email',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+                'message' => 'Validation failed. Please check your input.'
+            ], 422);
+        }
         try {
             DB::beginTransaction();
             $user = User::create([
@@ -108,6 +123,17 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'email' => 'required|unique:users,email,' . $id,
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+                'message' => 'Validation failed. Please check your input.'
+            ], 422);
+        }
         try {
             DB::beginTransaction();
             $user = User::find($id);

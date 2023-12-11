@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -26,7 +27,7 @@ class RoleController extends Controller
                     $permissionCount = count($data->permissions);
 
                     foreach ($data->permissions as $key => $permission) {
-                        $permissions .= '<span class="text-start fw-bold text-teal">' . $permission->name . '</span>';
+                        $permissions .= '<span class="badge bg-teal">' . $permission->name . '</span>';
                         // Tambahkan tanda koma jika bukan elemen terakhir
                         if ($key < $permissionCount - 1) {
                             $permissions .= '<br/>';
@@ -59,6 +60,16 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|unique:roles,name',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+                'message' => 'Validation failed. Please check your input.'
+            ], 422);
+        }
         try {
             DB::beginTransaction();
             $role = Role::create(['name' => $request->name]);
@@ -96,12 +107,6 @@ class RoleController extends Controller
      */
     public function edit(string $id)
     {
-        $role = Role::find($id);
-        $permissions = Permission::all();
-        if ($role) {
-            $permissions = Permission::all();
-            return view('roles.edit', compact('role', 'permissions'));
-        }
     }
 
     /**
@@ -109,6 +114,16 @@ class RoleController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|unique:roles,name,' . $id
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+                'message' => 'Validation failed. Please check your input.'
+            ], 422);
+        }
         try {
             DB::beginTransaction();
             $role = Role::find($id);

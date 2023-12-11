@@ -21,7 +21,7 @@ class PermissionController extends Controller
                     return view('permissions._option', compact('data'))->render();
                 })
                 ->editColumn('guard_name', function ($data) {
-                    return '<span class="badge bg-secondary">' . $data->guard_name . '</span>';
+                    return '<span class="badge bg-teal">' . $data->guard_name . '</span>';
                 })
                 ->addIndexColumn()
                 ->rawColumns(['action', 'guard_name'])
@@ -30,7 +30,6 @@ class PermissionController extends Controller
         $datas = [
             'title' => 'Permissions',
             'permissions' => Permission::all(),
-
         ];
         return view('permissions.index', $datas);
     }
@@ -49,9 +48,8 @@ class PermissionController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'name' => 'required|unique:permissions,name',
         ]);
-
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -61,16 +59,9 @@ class PermissionController extends Controller
         }
         try {
             DB::beginTransaction();
-
             $permission = Permission::create(['name' => $request->name]);
             if ($permission) {
                 DB::commit();
-
-                // activity()
-                //     ->causedBy(1)
-                //     ->performedOn($permission)
-                //     ->createdAt(now())
-                //     ->log('<span class="text-green text-capitalize">created permission </span> <span class="text-black fw-bold text-capitalize">"' . $permission->name . '"</span>');
                 return response()->json([
                     'success' => true,
                     'message' => 'Permission Created',
@@ -108,7 +99,16 @@ class PermissionController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // dd($request->all());
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|unique:permissions,name,' . $id,
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+                'message' => 'Validation failed. Please check your input.'
+            ], 422);
+        }
         try {
             DB::beginTransaction();
             $permission = Permission::find($id);
